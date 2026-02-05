@@ -121,9 +121,9 @@ class TableroMisiones:
 
     
     # Cancelar misión
-    def cancelar_evento(self, nombre_cazador, id_mision):
+    def cancelar_evento(self, id_mision):
         for evento in self.eventos:
-            if evento.cazador.nombre == nombre_cazador and evento.id_mision == id_mision:
+            if evento.id_mision == id_mision:
                 self.eventos.remove(evento)
                 self.canceladas.append(evento)
                 return f"Evento '{evento.nombre}' cancelado, recursos liberados."
@@ -293,7 +293,6 @@ def menu():
 
                 if confirmar == "si":
                     print("")    
-                    nombre = input("Nombre del cazador: ")
                     while True:
                         try:
                             id_mision = int(input("ID de la misión a cancelar: "))# El ID de la misión no es el de l misión original sino el que obtiene al crear el evento
@@ -359,4 +358,5 @@ def menu():
 
 # Punto de entrada
 if __name__ == "__main__":
+
     menu()
