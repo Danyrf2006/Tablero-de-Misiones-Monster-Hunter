@@ -32,10 +32,33 @@ class TableroMisiones:
     def __init__(self):
         # Se muestran las misiones disponibles (ID, Nombre, Rango mínimo)
         self.misiones_disponibles = [
-            (1, "Cazar Rathalos", 1),
-            (2, "Defender la aldea", 1),
-            (3, "Recolectar hierbas raras", 2),
-            (4, "Derrotar al Tigrex", 3)
+            (1, "Cazar Rathalos", 1, "Bosque", 
+     "Un Rathalos ha sido avistado cerca de la aldea, amenaza a los cazadores novatos.", 
+     "Media", "Escamas de Rathalos"),
+            (2, "Defender la aldea", 1, "Aldea", 
+     "Monstruos menores atacan las murallas de la aldea, se requiere defensa inmediata.", 
+     "Fácil", "Puntos de defensa y materiales comunes"),
+
+            (3, "Recolectar hierbas raras", 2, "Pantano", 
+     "Recolecta hierbas medicinales poco comunes que crecen en zonas húmedas.", 
+     "Media", "Hierbas raras y materiales de curación"),
+
+            (4, "Explorar la cueva volcánica", 2, "Volcán", 
+     "Investiga la actividad volcánica y posibles monstruos que habitan en las profundidades.", 
+     "Difícil", "Minerales raros y cristales volcánicos"),
+
+            (5, "Derrotar al Tigrex", 3, "Tundra", 
+     "Un Tigrex salvaje amenaza a los cazadores en las tierras heladas.", 
+     "Extremo", "Colmillos de Tigrex y piel endurecida"),
+
+            (6, "Cazar al Nargacuga", 3, "Bosque", 
+     "Un Nargacuga acecha en la oscuridad del bosque, rápido y letal.", 
+     "Difícil", "Plumas de Nargacuga y garras afiladas"),
+
+            (7, "Derrotar al Rajang", 3, "Montaña", 
+     "El poderoso Rajang ha aparecido, su fuerza descomunal aterroriza a los cazadores.", 
+     "Extremo", "Cuerno de Rajang y pelaje dorado")
+
         ]
 
         # Se muestran los distintos rangos de cazador(RC) (ID, Nombre)
@@ -71,7 +94,7 @@ class TableroMisiones:
     
     # Mostrar recursos disponibles (rangos, armas, misiones, días)
     def mostrar_rangos(self):
-        print("\nRangos disponibles:")
+        print("\nRango Cazador:")
         for id_r, nombre_r in self.rangos:
             print(f"{id_r}. {nombre_r}")
 
@@ -81,13 +104,30 @@ class TableroMisiones:
             print(f"{id_a}. {nombre_a}")
 
     def mostrar_misiones(self):
-        print("\nMisiones disponibles:")
+        print("\n=== MISIONES DISPONIBLES ===")
         print("")
         
-        for id_m, nombre_m, rango_min in self.misiones_disponibles:
+        for id_m, nombre_m, rango_min, _, _, _, _ in self.misiones_disponibles:
             rango_nombre = dict(self.rangos)[rango_min]
             print(f"{id_m}. {nombre_m} (Rango mínimo: {rango_nombre})")
         print("")
+
+    def mostrar_detalles_mision(self, mision_id):
+        mision_dict = {m[0]: m for m in self.misiones_disponibles}
+        if mision_id not in mision_dict:
+            print("La misión seleccionada no existe.")
+            return
+    
+        _, nombre, rango_min, zona, descripcion, dificultad, recompensa = mision_dict[mision_id]
+        rango_nombre = dict(self.rangos)[rango_min]
+
+        print("\n=== DETALLES DE LA MISIÓN ===\n")
+        print(f"Nombre: {nombre}")
+        print(f"Rango mínimo: {rango_nombre}")
+        print(f"Zona: {zona}")
+        print(f"Descripción: {descripcion}")
+        print(f"Dificultad: {dificultad}")
+        print(f"Recompensa: {recompensa}")
 
     def mostrar_dias(self):
         print("\nDías disponibles:")
@@ -163,28 +203,32 @@ def menu():
 
         # Se muestra una lista de las misiones(eventos) que estén activos en ese momento
         if opcion == "1":
-            limpiar_terminal()
+            
             # Bucle para mostrar misiones y pedir una selección válida
-            while True:
+            while True:                
+                limpiar_terminal()
                 tablero.mostrar_misiones()
                 try:
-                    seleccion = int(input("Presione [0] para regresar al menú: "))
+                    seleccion = int(input("Elija una misión para ver los detalles o presione [0] para regresar al menú: "))
                     print("")
                     if seleccion == 0:
                         break  # Regresa al menú principal
                     else:
-                        print("Solo debe presionar [0]. Intenta de nuevo.")
+                        limpiar_terminal()
+                        tablero.mostrar_detalles_mision(seleccion)
+                        print("")
+                        int(input("Presione [0] para regresar al menú: "))
                 except ValueError:
                     print("Entrada inválida. Debes escribir un número.")        
 
         elif opcion == "2":
             limpiar_terminal()
-            print("")
+            print("\n=== PLANIFICAR NUEVA MISIÓN ===\n")
             nombre = input("Nombre del cazador: ")
 
             # El usuario debe elegir el rango de cazador que guste, y esto afecta a las misiones que estén disponibles para ese rango
             while True:
-                try:
+                try:                    
                     tablero.mostrar_rangos()
                     rango_id = int(input("Elige tu rango (número): "))
                     if rango_id in dict(tablero.rangos):
@@ -249,7 +293,7 @@ def menu():
         elif opcion == "3":            
             limpiar_terminal()
             while True:                
-                print("\nMisiones activas:")
+                print("\n=== MISIONES ACTIVAS ===")
                 print("")
                 for e in tablero.listar_eventos():
                     print(e)
@@ -266,7 +310,7 @@ def menu():
         elif opcion == "4":
             limpiar_terminal()
             while True:
-                print("\nMisiones activas:")
+                print("\n=== MISIONES ACTIVAS ===")
                 print("")
                 eventos = tablero.listar_eventos()
                 for e in eventos:
@@ -299,7 +343,8 @@ def menu():
                             break
                         except ValueError:
                             print("Entrada inválida. Debes escribir un número.")
-                    resultado = tablero.cancelar_evento(nombre, id_mision)
+                    resultado = tablero.cancelar_evento(id_mision)
+                    print("")
                     print(resultado)
 
                     #
@@ -332,7 +377,7 @@ def menu():
         elif opcion == "5": 
             limpiar_terminal()           
             while True:                
-                print("\nHistorial de misiones canceladas:")
+                print("\n=== HISTORIAL DE MISIONES CANCELADAS ===")
                 print("")
                 for e in tablero.listar_canceladas():
                     print(e)
@@ -358,5 +403,4 @@ def menu():
 
 # Punto de entrada
 if __name__ == "__main__":
-
     menu()
