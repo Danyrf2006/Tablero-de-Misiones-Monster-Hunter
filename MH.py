@@ -1,3 +1,5 @@
+import json
+
 # Función para limpiar la terminal
 def limpiar_terminal():
     import os
@@ -273,9 +275,96 @@ class TableroMisiones:
             return ["No hay misiones canceladas."]
         return [f"[{e.id_mision}] {e.nombre} | {e.cazador} | CANCELADA" for e in self.canceladas]
 
+    # Guardado de datos 
+    def guardar_misiones(self, archivo="misiones.json"):
+        datos = [
+            {
+                "id_mision": e.id_mision,
+                "nombre": e.nombre,
+                "dia_semana": e.dia_semana,
+                "cazador": {
+                    "nombre": e.cazador.nombre,
+                    "rango_id": e.cazador.rango_id,
+                    "rango_nombre": e.cazador.rango_nombre,
+                    "arma_id": e.cazador.arma_id,
+                    "arma_nombre": e.cazador.arma_nombre,
+                    "objetos": e.cazador.objetos
+                }
+            } for e in self.eventos
+        ]
+        with open(archivo, "w", encoding="utf-8") as f:
+            json.dump(datos, f, indent=4, ensure_ascii=False)
+
+    def cargar_misiones(self, archivo="misiones.json"):
+        try:
+            with open(archivo, "r", encoding="utf-8") as f:
+                datos = json.load(f)
+                self.eventos = [
+                    Mision(
+                        e["id_mision"],
+                        e["nombre"],
+                        e["dia_semana"],
+                        Cazador(
+                            e["cazador"]["nombre"],
+                            e["cazador"]["rango_id"],
+                            e["cazador"]["rango_nombre"],
+                            e["cazador"]["arma_id"],
+                            e["cazador"]["arma_nombre"],
+                            e["cazador"]["objetos"]
+                        )
+                    ) for e in datos
+                ]
+                if self.eventos:
+                    self.next_id = max(ev.id_mision for ev in self.eventos) + 1
+                else:
+                    self.next_id = 1
+        except FileNotFoundError:
+            pass
+    def guardar_canceladas(self, archivo="canceladas.json"):        
+        datos = [
+            {
+                "id_mision": e.id_mision,
+                "nombre": e.nombre,
+                "dia_semana": e.dia_semana,
+                "cazador": {
+                    "nombre": e.cazador.nombre,
+                    "rango_id": e.cazador.rango_id,
+                    "rango_nombre": e.cazador.rango_nombre,
+                    "arma_id": e.cazador.arma_id,
+                    "arma_nombre": e.cazador.arma_nombre,
+                    "objetos": e.cazador.objetos
+                }
+            } for e in self.canceladas
+        ]
+        with open(archivo, "w", encoding="utf-8") as f:
+            json.dump(datos, f, indent=4, ensure_ascii=False)
+
+    def cargar_canceladas(self, archivo="canceladas.json"):
+        try:
+            with open(archivo, "r", encoding="utf-8") as f:
+                datos = json.load(f)
+                self.canceladas = [
+                    Mision(
+                        e["id_mision"],
+                        e["nombre"],
+                        e["dia_semana"],
+                        Cazador(
+                            e["cazador"]["nombre"],
+                            e["cazador"]["rango_id"],
+                            e["cazador"]["rango_nombre"],
+                            e["cazador"]["arma_id"],
+                            e["cazador"]["arma_nombre"],
+                            e["cazador"]["objetos"]
+                        )
+                    ) for e in datos
+                ]
+        except FileNotFoundError:
+            pass
 
 def menu():
     tablero = TableroMisiones()
+    tablero.cargar_misiones()
+    tablero.cargar_canceladas()
     # Se muestran las distintas opciones de acción que puede hacer el usuario
     while True:
         limpiar_terminal()
@@ -588,6 +677,8 @@ def menu():
 
         elif opcion == "7":
             limpiar_terminal()
+            tablero.guardar_misiones()
+            tablero.guardar_canceladas()
             print("¡Hasta la próxima cacería!")
             break
 
