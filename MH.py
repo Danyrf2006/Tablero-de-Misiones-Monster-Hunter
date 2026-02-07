@@ -98,7 +98,7 @@ class TableroMisiones:
             (6, "Bomba de luz"),
             (7, "Antídoto"),
             (8, "Piedra de afilar"),
-            (9, "Bombas tranquilizantes"),
+            (9, "Bomba tranquilizante"),
             (10, "Viales")
         ]
 
@@ -151,7 +151,7 @@ class TableroMisiones:
             print(f"{id_d}. {nombre_d}")
 
     def mostrar_objetos(self):
-        print("\nObjetos disponibles:")
+        print("\n=== OBJETOS DISPONIBLES ===\n")
         for id_o, nombre_o in self.objetos:
             print(f"{id_o}. {nombre_o}")
 
@@ -162,9 +162,9 @@ class TableroMisiones:
             2: ["Poción", "Piedra de afilar", "Viales"],  # Defender la aldea
             3: ["Poción"],  # Recolectar hierbas raras
             4: ["Poción", "Bebida fría", "Piedra de afilar", "Viales"],  # Cueva volcánica
-            5: ["Poción", "Bebida caliente", "Trampa de escollo", "Bomba de luz", "Bombas tranquilizantes", "Piedra de afilar", "Viales"],  # Tigrex
+            5: ["Poción", "Bebida caliente", "Trampa de escollo", "Bomba de luz", "Bomba tranquilizante", "Piedra de afilar", "Viales"],  # Tigrex
             6: ["Poción", "Bomba de luz", "Piedra de afilar", "Viales"],  # Nargacuga
-            7: ["Poción", "Trampa eléctrica", "Bombas tranquilizantes", "Piedra de afilar", "Viales"]  # Rajang
+            7: ["Poción", "Trampa eléctrica", "Bomba tranquilizante", "Piedra de afilar", "Viales"]  # Rajang
         }
 
         if objeto not in reglas[mision_id]:
@@ -183,14 +183,26 @@ class TableroMisiones:
         return True
 
     def validar_objeto_objeto(self, objetos):
+        # Exclusiones mutuas
         if "Piedra de afilar" in objetos and "Viales" in objetos:
             return False
         if "Trampa de escollo" in objetos and "Trampa eléctrica" in objetos:
             return False
         if "Bebida fría" in objetos and "Bebida caliente" in objetos:
             return False
-        if ("Trampa de escollo" in objetos or "Trampa eléctrica" in objetos) and "Bombas tranquilizantes" not in objetos:
-            return False
+        
+        co_requisitos = {
+            "Trampa de escollo": ["Bomba tranquilizante"],
+            "Trampa eléctrica": ["Bomba tranquilizante"]
+        }
+        for obj, requeridos in co_requisitos.items():
+            if obj in objetos:
+                for req in requeridos:
+                    if req not in objetos:
+                        print("")
+                        print(f"La elección de '{obj}' requiere también '{req}'.")
+                        return False
+
         return True
 
     # Agregar una nueva misión al tablón de misiones
@@ -267,15 +279,16 @@ def menu():
     # Se muestran las distintas opciones de acción que puede hacer el usuario
     while True:
         limpiar_terminal()
-        print("\n=== TABLERO DE MISIONES MONSTER HUNTER ===\n")
-        print("1. Listar misiones disponibles")
-        print("2. Planificar nueva misión")
-        print("3. Listar misiones activas")
-        print("4. Cancelar misión")
-        print("5. Ver historial de misiones canceladas")
-        print("6. Salir")
+        print("\n ⚔️  TABLERO DE MISIONES MONSTER HUNTER ⚔️ \n")
+        print(" 1. Listar misiones disponibles")
+        print(" 2. Planificar nueva misión")
+        print(" 3. Listar misiones activas")
+        print(" 4. Cancelar misión")
+        print(" 5. Ver historial de misiones canceladas")
+        print(" 6. Ver objetos disponibles")
+        print(" 7. Salir")
         # Elección de la opción deseada
-        opcion = input("\nElige una opción: ")
+        opcion = input("\n Elige una opción: ")
 
         # Se muestra una lista de las misiones(eventos) que estén activos en ese momento
         if opcion == "1":            
@@ -381,8 +394,21 @@ def menu():
                             valido = False
                             break
 
+                    co_requisitos_mision = {
+                        4: ["Bebida fría"],
+                        5: ["Bebida caliente"],
+                        7: ["Trampa eléctrica"]
+                    }
+                    # Validacion de co-requisitos por mision
+                    if mision_id in co_requisitos_mision:
+                        for req in co_requisitos_mision[mision_id]:
+                            if req not in objetos_elegidos:
+                                print("")
+                                print(f"La misión '{nombre_m}' requiere llevar obligatoriamente '{req}'.")
+                                valido = False
+
                     if valido and not tablero.validar_objeto_objeto(objetos_elegidos):
-                        print("La combinación de objetos elegida no cumple las restricciones.")
+                        print("\nLa combinación de objetos elegida no cumple las restricciones.")
                         valido = False
 
                     if valido:
@@ -548,14 +574,26 @@ def menu():
 
         elif opcion == "6":
             limpiar_terminal()
+            while True:
+                tablero.mostrar_objetos()
+                print("")
+                try:
+                    seleccion = int(input("Presione [0] para regresar al menú: "))
+                    if seleccion == 0:
+                        break
+                    else:
+                        print("\nSolo debe presionar [0]. Intente de nuevo.")
+                except ValueError:
+                    print("\nEntrada inválida. Debes escribir un número.")
+
+        elif opcion == "7":
+            limpiar_terminal()
             print("¡Hasta la próxima cacería!")
             break
 
         else:
             print("Opción inválida. Intenta de nuevo.")
 
-
 # Punto de entrada
 if __name__ == "__main__":
     menu()
-
